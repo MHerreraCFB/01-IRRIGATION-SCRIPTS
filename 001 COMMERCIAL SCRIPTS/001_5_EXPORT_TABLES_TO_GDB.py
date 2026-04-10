@@ -75,10 +75,10 @@ DICT={'JAN':'1',
 for m in MONTH_LIST:
     MONTH = m
     YEAR = str(int(datetime.now().strftime("%y")))
-    gdb_path = os.path.join(r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_GDB",
+    gdb_path = os.path.join(r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\GEODATABASE",
                             f"{CURRENT_MONTH}{YEAR}.gdb")
     out_table = os.path.join(gdb_path, f"COMMERCIAL_IRRIGATION_USAGE_{MONTH}{YEAR}")
     arcpy.ClearWorkspaceCache_management()  
-    arcpy.conversion.ExcelToTable(r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\002_COMMERCIAL\OUTPUT_TABLES" + "\\"+ CURRENT_MONTH + YEAR + "\\" + "COMMERCIAL_IRRIGATION_USAGE_" + MONTH + YEAR + ".xlsx",
+    arcpy.conversion.ExcelToTable(r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\COMMERCIAL_TABLES" + "\\"+ CURRENT_MONTH + YEAR + "\\" + "COMMERCIAL_IRRIGATION_USAGE_" + MONTH + YEAR + ".xlsx",
                                     os.path.join(gdb_path, "COMMERCIAL_IRRIGATION_USAGE_" + MONTH + YEAR))
  

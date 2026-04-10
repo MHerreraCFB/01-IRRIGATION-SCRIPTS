@@ -18,7 +18,7 @@ REQUIREMENTS:
     - Dependencies: arcpy, os, pandas, numpy, openpyxl, time
 
 INPUTS:
-    Monthly irrigation data excel sheets from MDS system. In test environment found: "A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\Commercial_Data" + "\\" + CURRENT_MONTH + YEAR + "\\" + "2025 Water Usage"
+    Monthly irrigation data excel sheets from MDS system.
 
 OUTPUTS:
     Creates a new table of aggregated and prepared data fields for the current month
@@ -54,12 +54,11 @@ DATE = strftime("%d%b%y", localtime()).upper()
 arcpy.ClearWorkspaceCache_management()
 arcpy.env.overwriteOutput = True
 
-MONTH_LIST = ['FEB']
-
-
-### CHANGE CURRENT MONTH, USE 3 LETTER ABBREVIATION ###
+MONTH_LIST = []
 
 CURRENT_MONTH = (datetime.now() - timedelta(days=30)).strftime("%b").upper()
+MONTH_LIST.push(CURRENT_MONTH)
+
 DICT={'JAN':'1',
 'FEB':'2',
 'MAR':'3',
@@ -86,7 +85,7 @@ var_dict = {1:"df1",
             4:"df4"}
     
 ## LOOP THRU RAW/RECEIVED EXCEL FILES, CONVERT TO DF AND APPEND TO ONE DF ###
-directory = r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\002_COMMERCIAL\Commercial_Scripts_Data" + "\\" + CURRENT_MONTH + YEAR + "\\" + "2026 Water Usage"
+directory = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\00 SUPPORT\TABLES_RECVD\COMMERCIAL" + "\\" + CURRENT_MONTH + YEAR + "\\" + "2026 Water Usage"
 count = 0
 rows= []
 for filename in os.listdir(directory):
@@ -134,13 +133,13 @@ for k in var_dict:
         df.rename(columns=lambda x: x.strip(), inplace = True)
 
     ### IMPORT TABLE WITH RMD_USAGE, MERGE TO COMMERCIAL SHAPES, HANDLE NON-MATCHES ###
-        irrigation_ciac = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\05 DELIVERABLES\00 GIS\IRRIGATION_USAGE.gdb\IRRIGATION_CIAC"
-        fields = ["ACC_PREFIX", "PROVIDER", "Type", "Permitted_Gallons_Per_Month"]
+        irrigation_ciac = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\00 GEODATABASE\IRRIGATION_USAGE.gdb\IRRIGATION_CIAC"
+        fields = ["ACC_PREFIX", "PROVIDER", "Type", "Permitted_"]
         data = [row for row in arcpy.da.SearchCursor(irrigation_ciac, fields)]
 
         rmd = pd.DataFrame(data, columns=fields)
         rmd.columns = rmd.columns.str.strip().str.replace('\u00A0', ' ')
-        rmd.rename(columns = {"Permitted_Gallons_Per_Month":"RMD_USAGE"}, inplace = True)
+        rmd.rename(columns = {"Permitted_":"RMD_USAGE"}, inplace = True)
         rmd.rename(columns = {"ACC_PREFIX":"Account Prefix"}, inplace = True)
 
         rmd_merge = pd.merge(df, rmd, how='inner', on='Account Prefix', suffixes=('_1', '_2'))
@@ -191,7 +190,7 @@ for k in var_dict:
             )
         ### CREATE FOLDER FOR TABLES (IF NOT YET EXISTING), WRITE MERGED DATAFRAME TO EXCEL ###
 if not rmd_clean.empty:
-        parent_dir = r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\002_COMMERCIAL\OUTPUT_TABLES"
+        parent_dir = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\COMMERCIAL_TABLES"
         output_folder = os.path.join(parent_dir, CURRENT_MONTH + YEAR)
             
             ###CREATE FOLDER IF IT DOES NOT EXIST

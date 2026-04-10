@@ -44,7 +44,7 @@ from datetime import datetime, timedelta
 CURRENT_MONTH = (datetime.now() - timedelta(days=30)).strftime("%b").upper()
 YEAR = str(int(datetime.now().strftime("%y")))
 
-GDB =  r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_GDB" + "\\" + CURRENT_MONTH + YEAR  + ".gdb"
+GDB =  r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\GEODATABASE" + "\\" + CURRENT_MONTH + YEAR  + ".gdb"
 arcpy.env.workspace = GDB
 arcpy.env.overwriteOutput = True
 tables = arcpy.ListTables()
@@ -226,7 +226,7 @@ print(df_final)
 #df_final.to_excel(writer, CURRENT_MONTH + YEAR ,index=False, startrow=0 , startcol=0)
 #writer.save()
 file_path = (
-    r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\002_COMMERCIAL\OUTPUT_TABLES"
+    r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\COMMERCIAL_TABLES"
     + "\\" + CURRENT_MONTH + YEAR + "\\"
     + "COMMERCIAL_IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + "_FINAL.xlsx"
 )
@@ -238,5 +238,5 @@ with pd.ExcelWriter(file_path, engine='xlsxwriter') as writer:
 
 ### CONVERT TABLE TO GDB ###
 # table = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\01 DATA\00 GIS\IRRIGATION.gdb\D14_MATCHES"
-arcpy.conversion.ExcelToTable(r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\002_COMMERCIAL\OUTPUT_TABLES" + "\\"+ CURRENT_MONTH + YEAR + "\\" + "COMMERCIAL_IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + "_FINAL" + ".xlsx",
-                              r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_GDB" + "\\" + CURRENT_MONTH + YEAR  + ".gdb" + "\\" + "COMMERCIAL_IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + "_FINAL")
+arcpy.conversion.ExcelToTable(r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\COMMERCIAL_TABLES" + "\\"+ CURRENT_MONTH + YEAR + "\\" + "COMMERCIAL_IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + "_FINAL" + ".xlsx",
+                              r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\GEODATABASE" + "\\" + CURRENT_MONTH + YEAR  + ".gdb" + "\\" + "COMMERCIAL_IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + "_FINAL")

@@ -48,7 +48,7 @@ for m in MONTH_LIST:
             4:"df4"}
     
     ## LOOP THRU RAW/RECEIVED EXCEL FILES, CONVERT TO DF AND APPEND TO ONE DF ###
-    directory = r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\002_COMMERCIAL\Commercial_Scripts_Data" + "\\" + CURRENT_MONTH + YEAR + "\\" + "2026 Water Usage"
+    directory = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\COMMERCIAL_TABLES" + "\\" + CURRENT_MONTH + YEAR + "\\" + "2026 Water Usage"
     count = 0
     rows= []
     time.sleep(10)
@@ -163,7 +163,7 @@ for m in MONTH_LIST:
         df.rename(columns=lambda x: x.strip(), inplace = True)
 
     ### IMPORT TABLE WITH RMD_USAGE, MERGE TO COMMERCIAL SHAPES, HANDLE NON-MATCHES ###
-        rmd_table = r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\002_COMMERCIAL\Commercial_Scripts_Data" + "\\" + "MSI102.xlsx"
+        rmd_table = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\COMMERCIAL_TABLES" + "\\" + "MSI102.xlsx"
         rmd = pd.read_excel(rmd_table)
         rmd.columns = rmd.columns.str.strip().str.replace('\u00A0', ' ')
         print("MSI has incoming columns:", rmd.columns.tolist())
@@ -258,7 +258,7 @@ for m in MONTH_LIST:
 
         ### CONVERT TABLE TO GDB ###
         # table = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\01 DATA\00 GIS\IRRIGATION.gdb\D14_MATCHES"
-        gdb_path = os.path.join(r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_GDB",
+        gdb_path = os.path.join(r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\GEODATABASE",
                             f"{CURRENT_MONTH}{YEAR}.gdb")
         out_table = os.path.join(gdb_path, f"COMMERCIAL_IRRIGATION_USAGE_{MONTH}{YEAR}")
 
