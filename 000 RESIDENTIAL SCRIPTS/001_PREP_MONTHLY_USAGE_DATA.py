@@ -25,9 +25,7 @@ OUTPUTS:
 
 NOTES:
     Part one in a series of four, and a one and a half. Must change the month to current month before running.
-    Acculumate new closing date to the complete closing date file for the complete file, open last months and append last months to the current month: For September processing go to
-    A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\Irrigation_Scripts_Testing_Data\AUG25\MSI100
-    Export out the most up to date homesite data from Dev_Residential to A:\GIS\00 DATA\02 GEODATABASES\800 SCRATCH_DATA\MH_SCRATCH_DATA\HERRERA_SCRATCH_DATA.gdb\HOMESITE
+    Acculumate new closing date to the complete closing date file for the complete file, open last months and append last months to the current month
     Create a GDB using ArcCatalog in A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_GDB with CURRENTMONTH+CURRENTYEAR.gdb
 
 CHANGELOG:
@@ -90,7 +88,7 @@ var_dict = {1:"df1",
             4:"df4"}
     
 ### LOOP THRU RAW/RECEIVED EXCEL FILES, CONVERT TO DF AND APPEND TO ONE DF ###
-directory = r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\Irrigation_Scripts_Testing_Data" + "\\" + CURRENT_MONTH + YEAR + "\\" + "MOD"
+directory = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\00 SUPPORT\TABLES_RECVD\RESIDENTIAL" + "\\" + CURRENT_MONTH + YEAR + "\\" + "MOD"
 count = 0
 rows= []
 for filename in os.listdir(directory):
@@ -154,10 +152,10 @@ for k in var_dict:
     df_ready = prepare_dataframe(df, CURRENT_MONTH, YEAR)
 
     ### CREATE FOLDER FOR TABLES (IF NOT YET EXISTING), WRITE MERGED DATAFRAME TO EXCEL ###
-    parent_dir = r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_TABLES"
+    parent_dir = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\RESIDENTIAL_TABLES"
     output_folder = os.path.join(parent_dir, CURRENT_MONTH + YEAR)
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
-    writer = pd.ExcelWriter(r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_TABLES" + "\\"+ CURRENT_MONTH + YEAR + "\\" + "IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + ".xlsx", engine='xlsxwriter')
+    writer = pd.ExcelWriter(r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\RESIDENTIAL_TABLES" + "\\"+ CURRENT_MONTH + YEAR + "\\" + "IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + ".xlsx", engine='xlsxwriter')
     df_ready.to_excel(writer, CURRENT_MONTH + YEAR,index=False, startrow=0 , startcol=0)
     writer.close()

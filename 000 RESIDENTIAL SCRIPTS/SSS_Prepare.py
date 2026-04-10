@@ -1,3 +1,42 @@
+"""
+===============================================================================
+SCRIPT NAME:    SSS_Prepare.py
+
+AUTHOR:         Moises Herrera
+CREATED ON:     2026-04-01 (YYYY-MM-DD)
+LAST UPDATED:   2026-04-08 (YYYY-MM-DD)
+VERSION:        1.2.0 (e.g., 1.0.0)
+
+DESCRIPTION:
+    Support function to be used in 001_PREP_MONTHLY_USAGE_DATA.py
+
+USAGE:
+    Hit run or run in debug mode
+
+REQUIREMENTS:
+    - Python version: 3.11.8
+    - Dependencies: arcpy, os, pandas, numpy, openpyxl, time, sqlalchemy
+
+INPUTS:
+    A Dataframe, a Month string, and a Year string
+
+OUTPUTS:
+    Returns a clean dataframe and provides other useful functions often required in scripts. 
+
+NOTES:
+    Acculumate new closing date to the complete closing date file for the complete file, open last months and append last months to the current month
+    Exports out newest homesite data from Dev_Residential to A:\GIS\00 DATA\02 GEODATABASES\800 SCRATCH_DATA\MH_SCRATCH_DATA\HERRERA_SCRATCH_DATA.gdb\HOMESITE
+
+CHANGELOG:
+    2026-04-08 - Moises Herrera: Making some updates, documentation, adding Copy Features.
+    YYYY-MM-DD - <Author>: <Another change>
+    YYYY-MM-DD - <Author>: <Another change>
+===============================================================================
+"""
+# Export out the most up to date homesite data from Dev_Residential to A:\GIS\00 DATA\02 GEODATABASES\800 SCRATCH_DATA\MH_SCRATCH_DATA\HERRERA_SCRATCH_DATA.gdb\HOMESITE
+
+import time
+
 import pandas as pd
 import numpy as np
 import arcpy
@@ -83,7 +122,7 @@ def prepare_dataframe(df: pd.DataFrame, CURRENT_MONTH:str, YEAR:str):
     print(df_merge_sort)
 
     ### IMPORT SOD SF TABLE, MERGE TO HOMESITES, HANDLE NON-MATCHES, CALC RECOMMENDED USAGE ###
-    sod_table = r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\Irrigation_Scripts_Testing_Data" + "\\" + CURRENT_MONTH + YEAR + "\\" + "MSI102.xlsx"
+    sod_table = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\00 SUPPORT\TABLES_RECVD\RESIDENTIAL" + "\\" + CURRENT_MONTH + YEAR + "\\" + "MSI102.xlsx"
     sod = pd.read_excel(sod_table, sheet_name='Homesites Total SqFt')
     sod.rename(columns = {"HOMESITE_ALL_KEYS":"RES_ID"}, inplace = True)
     sod.rename(columns = {"TOTAL_SOD_SQUARE_FEET":"SOD_SF"}, inplace = True)
@@ -129,8 +168,10 @@ def prepare_dataframe(df: pd.DataFrame, CURRENT_MONTH:str, YEAR:str):
     df_clean.loc[(df_clean["Customer_Name"].str.contains("VILLAGES")) & (~df_clean["Customer_Name"].str.contains("/")), 'OWNERSHIP'] = 'THE VILLAGES'
 
     ### JOIN TO CLOSING DATE TABLE ###
-    closing_date_table = r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\Irrigation_Scripts_Testing_Data" + "\\" + CURRENT_MONTH + YEAR + "\\" + "MSI100.xlsx"
-    cdt = pd.read_excel(closing_date_table, 0)
+    closing_date_complete_table = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\00 SUPPORT\TABLES_RECVD\RESIDENTIAL\CLOSING_DATE_COMPLETE\MSI100.xlsx"
+    prepare_closing_date_table();
+    time.sleep(3);
+    cdt = pd.read_excel(closing_date_complete_table, 0)
     # RENAME COLUmNS #
     cdt.rename(columns = {"HOMESITE_ALL_KEYS":"RES_ID_CDT"}, inplace = True)
     cdt.rename(columns = {"PHYSICAL_CLOSING_DATE":"CLOSING_DATE"}, inplace = True)
@@ -178,11 +219,45 @@ def exportFeatures(inPath, outPath, xpression, name):
 
 
 
+def copyFeatures(inPath, outPath, ):
+    success = False
+    attempt = 0
+    maxAttempts = 3
+    while attempt < maxAttempts and not success:
+        try:
+            attempt += 1
+            arcpy.management.CopyFeatures(inPath, outPath)
+            success = True
+        except Exception as e:
+            if attempt < maxAttempts:
+                print(f"Trying attempt {attempt + 1}....")
+                               
+    if not success:
+        print("All attempts failed")
+
+
+
 def prepare_data():
     ### EXPORT HOMESITES TO IRRIGATION GDB
     GDB = r"A:\GIS\00 DATA\02 GEODATABASES\800 SCRATCH_DATA\MH_SCRATCH_DATA\HERRERA_SCRATCH_DATA.gdb"
     arcpy.env.workspace = r"A:\GIS\00 DATA\02 GEODATABASES\001 DEVELOPMENT\DEV_RESIDENTIAL.gdb"
     arcpy.env.overwriteOutput = True
-    arcpy.conversion.CopyFeatures('RESIDENTIAL_FD\HOMESITE', GDB + "\\" + "HOMESITE")
+    arcpy.management.CopyFeatures('RESIDENTIAL_FD\HOMESITE', GDB + "\\" + "HOMESITE")
+
+def prepare_closing_date_table():
+    # APPEND MONTHLY MSI100 to COMPLETE TABLE AND WRITE BACK TO EXCEL WORKSHEET
+
+    closing_date_table = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\00 SUPPORT\TABLES_RECVD\RESIDENTIAL" + "\\" + CURRENT_MONTH + YEAR + "\\" + "MSI100.xlsx"
+    closing_date_complete_table = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\00 SUPPORT\TABLES_RECVD\RESIDENTIAL\CLOSING_DATE_COMPLETE\MSI100.xlsx"
+
+    # Load data
+    temp_cdt = pd.read_excel(closing_date_table)
+    df_complete = pd.read_excel(closing_date_complete_table)
+
+    # Append (concatenate)
+    df_updated = pd.concat([df_complete, temp_cdt], ignore_index=True)
+
+    # Write back to the original file
+    df_updated.to_excel(closing_date_complete_table, index=False)
 
     
