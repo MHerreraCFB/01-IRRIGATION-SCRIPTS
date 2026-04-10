@@ -54,9 +54,23 @@ from openpyxl import load_workbook
 from datetime import datetime, timedelta
 import time
 from time import localtime, strftime
-from SSS_Prepare import prepare_dataframe
+from IRRIGATION_PREPARE_PACKAGE import prepare_dataframe, prepare_data, prepare_closing_date_table
 
 print("SCRIPT STARTED AT " + strftime("%m/%d/%Y %H:%M:%S", localtime()))
+
+#INITIALIZATION STEPS
+prepare_data()
+
+### PREPARE CLOSING DATE TABLE ###
+closing_date_complete_table = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\00 SUPPORT\TABLES_RECVD\RESIDENTIAL\CLOSING_DATE_COMPLETE\MSI100.xlsx"
+prepare_closing_date_table()
+time.sleep(3)
+cdt = pd.read_excel(closing_date_complete_table, 0)
+
+
+# RENAME COLUMNS #
+cdt.rename(columns = {"HOMESITE_ALL_KEYS":"RES_ID_CDT"}, inplace = True)
+cdt.rename(columns = {"PHYSICAL_CLOSING_DATE":"CLOSING_DATE"}, inplace = True)
 
 DATE = strftime("%d%b%y", localtime()).upper()
 arcpy.ClearWorkspaceCache_management()
@@ -149,13 +163,13 @@ for k in var_dict:
     df.to_csv("frame_after_excel_reading.csv", index=False)
 
 # Prepare Dataframe using a support python file
-    df_ready = prepare_dataframe(df, CURRENT_MONTH, YEAR)
+    df_ready = prepare_dataframe(df, cdt)
 
     ### CREATE FOLDER FOR TABLES (IF NOT YET EXISTING), WRITE MERGED DATAFRAME TO EXCEL ###
     parent_dir = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\RESIDENTIAL_TABLES"
     output_folder = os.path.join(parent_dir, CURRENT_MONTH + YEAR)
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
-    writer = pd.ExcelWriter(r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\RESIDENTIAL_TABLES" + "\\"+ CURRENT_MONTH + YEAR + "\\" + "IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + ".xlsx", engine='xlsxwriter')
+    writer = pd.ExcelWriter(parent_dir + "\\"+ CURRENT_MONTH + YEAR + "\\" + "IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + ".xlsx", engine='xlsxwriter')
     df_ready.to_excel(writer, CURRENT_MONTH + YEAR,index=False, startrow=0 , startcol=0)
     writer.close()

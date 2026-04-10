@@ -1,6 +1,6 @@
 """
 ===============================================================================
-SCRIPT NAME:    SSS_Prepare.py
+SCRIPT NAME:    IRRIGATION_PREPARE_PACKAGE.py
 
 AUTHOR:         Moises Herrera
 CREATED ON:     2026-04-01 (YYYY-MM-DD)
@@ -18,14 +18,13 @@ REQUIREMENTS:
     - Dependencies: arcpy, os, pandas, numpy, openpyxl, time, sqlalchemy
 
 INPUTS:
-    A Dataframe, a Month string, and a Year string
+    Varies on function used
 
 OUTPUTS:
-    Returns a clean dataframe and provides other useful functions often required in scripts. 
+    Varies on function used
 
 NOTES:
-    Acculumate new closing date to the complete closing date file for the complete file, open last months and append last months to the current month
-    Exports out newest homesite data from Dev_Residential to A:\GIS\00 DATA\02 GEODATABASES\800 SCRATCH_DATA\MH_SCRATCH_DATA\HERRERA_SCRATCH_DATA.gdb\HOMESITE
+    Contains various support functions used to prepare irrigation usage final tables before uploading to ArcGIS Enterprise Dashboard
 
 CHANGELOG:
     2026-04-08 - Moises Herrera: Making some updates, documentation, adding Copy Features.
@@ -35,6 +34,7 @@ CHANGELOG:
 """
 # Export out the most up to date homesite data from Dev_Residential to A:\GIS\00 DATA\02 GEODATABASES\800 SCRATCH_DATA\MH_SCRATCH_DATA\HERRERA_SCRATCH_DATA.gdb\HOMESITE
 
+from datetime import datetime, timedelta
 import time
 
 import pandas as pd
@@ -42,7 +42,12 @@ import numpy as np
 import arcpy
 from sqlalchemy import DATE
 
-def prepare_dataframe(df: pd.DataFrame, CURRENT_MONTH:str, YEAR:str):
+#DECLARE GLOBAL VARIABLES
+
+CURRENT_MONTH = (datetime.now() - timedelta(days=30)).strftime("%b").upper()
+YEAR = str(int(datetime.now().strftime("%y")))
+
+def prepare_dataframe(df: pd.DataFrame, cdt: pd.DataFrame):
 
     arcpy.ClearWorkspaceCache_management()
     arcpy.env.overwriteOutput = True
@@ -166,15 +171,6 @@ def prepare_dataframe(df: pd.DataFrame, CURRENT_MONTH:str, YEAR:str):
     ### CREATE OWNERSHIP COLUMN, CALCULATE VILLAGES OR PRIVATE FOR VALUE BASED ON THE NAME COLUMN AND CONDITIONAL STATEMENT ###
     df_clean['OWNERSHIP'] = 'PRIVATE'
     df_clean.loc[(df_clean["Customer_Name"].str.contains("VILLAGES")) & (~df_clean["Customer_Name"].str.contains("/")), 'OWNERSHIP'] = 'THE VILLAGES'
-
-    ### JOIN TO CLOSING DATE TABLE ###
-    closing_date_complete_table = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\00 SUPPORT\TABLES_RECVD\RESIDENTIAL\CLOSING_DATE_COMPLETE\MSI100.xlsx"
-    prepare_closing_date_table();
-    time.sleep(3);
-    cdt = pd.read_excel(closing_date_complete_table, 0)
-    # RENAME COLUmNS #
-    cdt.rename(columns = {"HOMESITE_ALL_KEYS":"RES_ID_CDT"}, inplace = True)
-    cdt.rename(columns = {"PHYSICAL_CLOSING_DATE":"CLOSING_DATE"}, inplace = True)
         
     cdt_merge = pd.merge(df_clean, cdt, how='left', left_on='RES_ID', right_on='RES_ID_CDT', suffixes=('_1', '_2'))
     cdt_merge.to_csv("frame_after_closing_date_join.csv", index=False)
@@ -236,13 +232,16 @@ def copyFeatures(inPath, outPath, ):
         print("All attempts failed")
 
 
-
 def prepare_data():
     ### EXPORT HOMESITES TO IRRIGATION GDB
-    GDB = r"A:\GIS\00 DATA\02 GEODATABASES\800 SCRATCH_DATA\MH_SCRATCH_DATA\HERRERA_SCRATCH_DATA.gdb"
+    GDB = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\00 GEODATABASE\IRRIGATION_USAGE.gdb"
     arcpy.env.workspace = r"A:\GIS\00 DATA\02 GEODATABASES\001 DEVELOPMENT\DEV_RESIDENTIAL.gdb"
     arcpy.env.overwriteOutput = True
     arcpy.management.CopyFeatures('RESIDENTIAL_FD\HOMESITE', GDB + "\\" + "HOMESITE")
+    arcpy.management.CopyFeatures('RESIDENTIAL_FD\NEIGHBORHOOD', GDB + "\\" + "NEIGHBORHOOD")
+    arcpy.env.workspace = r"A:\GIS\00 DATA\02 GEODATABASES\001 DEVELOPMENT\DEV_ROADWAY.gdb"
+    arcpy.env.overwriteOutput = True
+    arcpy.management.CopyFeatures('ROADWAY_FD\ROADWAY_EOP', GDB + "\\" + "ROADS_" + DATE)
 
 def prepare_closing_date_table():
     # APPEND MONTHLY MSI100 to COMPLETE TABLE AND WRITE BACK TO EXCEL WORKSHEET

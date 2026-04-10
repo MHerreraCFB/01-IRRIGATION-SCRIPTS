@@ -50,25 +50,17 @@ from time import localtime, strftime
 arcpy.ClearWorkspaceCache_management()
 
 DATE = strftime("%d%b%y", localtime()).upper()
-CURRENT_MONTH = "FEB" ####################################### REQUIRES USER INPUT TO CHANGE, USE 3-LETTER MONTH KEY FOR CURRENT MONTH YOU ARE RUNNING
-YEAR = '26'
-GDB =  r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_GDB" + "\\" + CURRENT_MONTH + YEAR  + ".gdb"
-arcpy.env.workspace = r"A:\GIS\00 DATA\02 GEODATABASES\800 SCRATCH_DATA\MH_SCRATCH_DATA\HERRERA_SCRATCH_DATA.gdb"
-arcpy.env.overwriteOutput = True
+CURRENT_MONTH = (datetime.now() - datetime.timedelta(days=30)).strftime("%b").upper()
+YEAR = str(int(datetime.now().strftime("%y")))
+GDB =  r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\GEODATABASE" + "\\" + CURRENT_MONTH + YEAR  + ".gdb"
 
-### FEATURE ALREADY EXISTS FROM PART 002 ###
-arcpy.conversion.ExportFeatures('HOMESITE', GDB + "\\" + "HOMESITES_" + DATE)
-
-
-### SWITCH WORKSPACE TO IRR GDB, SET HOMESITES AS INPUT FOR FEATURE LAYER JOIN
+### MAKE WORKSPACE GDB, SET HOMESITES AS INPUT FOR FEATURE LAYER JOIN
 arcpy.env.workspace = GDB
 arcpy.env.overwriteOutput = True
 arcpy.env.qualifiedFieldNames = False
 
 inFeatures = GDB + "\\" + "HOMESITES_" + DATE
 
-# ### DELETE ADDRESS FIELD FROM SHAPE DATA - WE HAVE THIS FROM IRR USAGE TABLE ###
-# arcpy.management.DeleteField(inFeatures, ["ADDRESS"])
 
 ### LOOP THRU LIST OF TABLES IN IRR GDB, MAKE THEM INTO TABLE VIEWS, JOIN TO HOMESITES, AND EXPORT FOR EACH MONTH
 tables = arcpy.ListTables()
@@ -293,7 +285,7 @@ convert_fields_to_long_no_prefix(dissolved_roads, method="round")
 arcpy.ClearWorkspaceCache_management()
 time.sleep(5)
 ### DISSOLVE UNITS ON RES_TYPE5 AND DISTRICT ###
-arcpy.management.Dissolve(r"A:\GIS\00 DATA\02 GEODATABASES\800 SCRATCH_DATA\MH_SCRATCH_DATA\HERRERA_SCRATCH_DATA.gdb\NEIGHBORHOOD", GDB + "\\" + 'UNITS_SHAPE_FOR_JOIN_' + CURRENT_MONTH + YEAR, 
+arcpy.management.Dissolve(r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\00 GEODATABASE\IRRIGATION_USAGE.gdb\NEIGHBORHOOD", GDB + "\\" + 'UNITS_SHAPE_FOR_JOIN_' + CURRENT_MONTH + YEAR, 
                           ["RES_TYPE5", "DISTRICT"])
 
 ### EXPORT D14, NOT D14 FOR BOTH UNITS, ROADS
@@ -314,9 +306,9 @@ arcpy.conversion.ExportFeatures('UNITS_SHAPE_FOR_JOIN_' + CURRENT_MONTH + YEAR, 
 time.sleep(10)
 arcpy.conversion.ExportFeatures('UNITS_SHAPE_FOR_JOIN_' + CURRENT_MONTH + YEAR, GDB + "\\" + "UNITS_FOR_JOIN_NOT_D14_MCDDA_" + DATE, "DISTRICT NOT LIKE '14' AND DISTRICT NOT LIKE 'MCDDA'")
 
-arcpy.env.workspace = r"A:\GIS\00 DATA\02 GEODATABASES\800 SCRATCH_DATA\MH_SCRATCH_DATA\HERRERA_SCRATCH_DATA.gdb"
+arcpy.env.workspace = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\00 GEODATABASE\IRRIGATION_USAGE.gdb"
 arcpy.env.overwriteOutput = True
-arcpy.conversion.ExportFeatures('ROADWAY_EOP', GDB + "\\" + "ROADS_" + DATE)
+arcpy.management.CopyFeatures("ROADS_" + DATE, GDB + "\\" + "ROADS_" + DATE)
 
 arcpy.env.workspace = GDB
 arcpy.env.overwriteOutput = True
@@ -499,6 +491,6 @@ for fc in arcpy.ListFeatureClasses("*FINAL",'',''):
     arcpy.management.CalculateField(fc, "CUR_USAGE", f"!{CURRENT_MONTH_USAGE}!", "PYTHON3")
     arcpy.management.CalculateField(fc, "CUR_PCT", f"!{CURRENT_MONTH_PCT}!", "PYTHON3")
 
-    arcpy.CopyFeatures_management(in_features=fc, out_feature_class= r"A:\GIS\00 DATA\02 GEODATABASES\800 SCRATCH_DATA\MH_SCRATCH_DATA\HERRERA_SCRATCH_DATA.gdb" + "\\" + fc)
+    arcpy.CopyFeatures_management(in_features=fc, out_feature_class= r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\00 GEODATABASE\IRRIGATION_USAGE.gdb" + "\\" + fc)
 
 ## PART 005: MERGE WITH MOST RECENT CONTRACTORS, USE RESULTS FROM IRRIGATION DATA SCRIPTS USE THE UNIT ENTRIES AND MERGE WITH THE FINAL UNITS OUTPUT SHOULD BE ONLY 4 or 5, FILL IN MISSING FIELDS LIKE UNIT, DISTRICT, UNIT JOIN AFTER MERGE.

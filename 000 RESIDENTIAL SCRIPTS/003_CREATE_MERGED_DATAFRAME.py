@@ -34,16 +34,19 @@ CHANGELOG:
 """
 
 ### IMPORT ALL MONTHLY GIS TABLES AS DATAFRAMES, MERGE TOGETHER INTO 1 DATAFRAME, CALC 4MONTH USAGE/REC FIELDS, EXPORT MERGED TABLE ###
+from datetime import timedelta
+import datetime
+
 import arcpy
 import pandas as pd
 import calendar
 from collections import deque
 import numpy as np
 
-CURRENT_MONTH = "FEB" ####################################### REQUIRES USER INPUT TO CHANGE, USE 3-LETTER MONTH KEY FOR CURRENT MONTH YOU ARE RUNNING
-YEAR = '26'
+CURRENT_MONTH = (datetime.now() - timedelta(days=30)).strftime("%b").upper()
+YEAR = str(int(datetime.now().strftime("%y")))
 
-GDB =  r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_GDB" + "\\" + CURRENT_MONTH + YEAR  + ".gdb"
+GDB =  r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\GEODATABASE" + "\\" + CURRENT_MONTH + YEAR  + ".gdb"
 arcpy.env.workspace = GDB
 arcpy.env.overwriteOutput = True
 tables = arcpy.ListTables()
@@ -236,7 +239,7 @@ print(df_final)
 #df_final.to_excel(writer, CURRENT_MONTH + YEAR ,index=False, startrow=0 , startcol=0)
 #writer.save()
 file_path = (
-    r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_TABLES"
+    r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\RESIDENTIAL_TABLES"
     + "\\" + CURRENT_MONTH + YEAR + "\\"
     + "IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + "_FINAL.xlsx"
 )
@@ -248,5 +251,5 @@ with pd.ExcelWriter(file_path, engine='xlsxwriter') as writer:
 
 ### CONVERT TABLE TO GDB ###
 # table = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\01 DATA\00 GIS\IRRIGATION.gdb\D14_MATCHES"
-arcpy.conversion.ExcelToTable(r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_TABLES" + "\\"+ CURRENT_MONTH + YEAR + "\\" + "IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + "_FINAL" + ".xlsx",
-                              r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_GDB" + "\\" + CURRENT_MONTH + YEAR  + ".gdb" + "\\" + "IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + "_FINAL")
+arcpy.conversion.ExcelToTable(r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\RESIDENTIAL_TABLES" + "\\"+ CURRENT_MONTH + YEAR + "\\" + "IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + "_FINAL" + ".xlsx",
+                              r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\GEODATABASE" + "\\" + CURRENT_MONTH + YEAR  + ".gdb" + "\\" + "IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + "_FINAL")

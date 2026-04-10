@@ -24,7 +24,7 @@ OUTPUTS:
     Core Homesites, GDB Tables from 001_5
 
 NOTES:
-    Part two of a four part series. Must change current month. 
+    Part two of a four part series.
 
 CHANGELOG:
     YYYY-MM-DD - <Author>: <Description of change>
@@ -39,15 +39,15 @@ import datetime
 import time
 from time import localtime, strftime
 DATE = strftime("%d%b%y", localtime()).upper()
-CURRENT_MONTH = "FEB" ####################################### REQUIRES USER INPUT TO CHANGE, USE 3-LETTER MONTH KEY FOR CURRENT MONTH YOU ARE RUNNING
-YEAR = "26" ###################### MAKE SURE IT IS CURRENT YEAR
+CURRENT_MONTH = (datetime.now() - datetime.timedelta(days=30)).strftime("%b").upper()
+YEAR = str(int(datetime.now().strftime("%y")))
 
 ### JOIN TO HOMESITES FOR EACH MONTH ###
 ### EXPORT HOMESITES TO IRRIGATION GDB
-GDB = r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_GDB" + "\\" + CURRENT_MONTH + YEAR  + ".gdb"
-arcpy.env.workspace = r"A:\GIS\00 DATA\02 GEODATABASES\800 SCRATCH_DATA\MH_SCRATCH_DATA\HERRERA_SCRATCH_DATA.gdb"
+GDB = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\GEODATABASE" + "\\" + CURRENT_MONTH + YEAR  + ".gdb"
+arcpy.env.workspace = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\00 GEODATABASE\IRRIGATION_USAGE.gdb"
 arcpy.env.overwriteOutput = True
-arcpy.conversion.ExportFeatures('HOMESITE', GDB + "\\" + "HOMESITES_" + DATE)
+arcpy.management.CopyFeatures('HOMESITE', GDB + "\\" + "HOMESITES_" + DATE)
 
 ### SWITCH WORKSPACE TO IRR GDB, SET HOMESITES AS INPUT FOR FEATURE LAYER JOIN
 arcpy.env.workspace = GDB
@@ -55,6 +55,7 @@ arcpy.env.overwriteOutput = True
 arcpy.env.qualifiedFieldNames = False
 
 inFeatures = GDB + "\\" + "HOMESITES_" + DATE
+
 
 ### LOOP THRU LIST OF TABLES IN IRR GDB, MAKE THEM INTO TABLE VIEWS, JOIN TO FEATURE LAYER OF HOMESITES, AND EXPORT FOR EACH MONTH
 tables = arcpy.ListTables()
