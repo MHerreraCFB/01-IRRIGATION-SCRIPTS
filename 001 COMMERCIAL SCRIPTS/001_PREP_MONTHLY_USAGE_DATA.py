@@ -4,7 +4,7 @@ SCRIPT NAME:    001_PREP_MONTHLY_USAGE_DATA.py (COMMERCIAL)
 
 AUTHOR:         Moises Herrera
 CREATED ON:     2025-10-01 (YYYY-MM-DD)
-LAST UPDATED:   
+LAST UPDATED:   2026-04-08
 VERSION:        1.0.0
 
 DESCRIPTION:
@@ -24,8 +24,8 @@ OUTPUTS:
     Creates a new table of aggregated and prepared data fields for the current month
 
 NOTES:
-    Part one in a series of four, and a one and a half. Must change the month to current month before running.
-    Export out the most up to date commercial shapes to A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\05 DELIVERABLES\00 GIS\IRRIGATION_USAGE.gdb
+    Part one in a series of four, and a one and a half.
+    Export out the most up to date commercial shapes to A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\00 GEODATABASE\IRRIGATION_USAGE.gdb
 
 COMMON BUGS AND SOLUTIONS: File is not a zip file. Change Excel type to correct type.
 
@@ -39,14 +39,11 @@ CHANGELOG:
 
 ### PART 001: IMPORT USAGE TABLES, JOIN TO COMMERCIAL SHAPES, AND EXPORT MONTHLY TABLES TO GDB
 import arcpy
-import re
 import os
 import pandas as pd
 import numpy as np
-import xlsxwriter
 from openpyxl import load_workbook
 from datetime import datetime, timedelta
-import time
 from time import localtime, strftime
 print("SCRIPT STARTED AT " + strftime("%m/%d/%Y %H:%M:%S", localtime()))
 

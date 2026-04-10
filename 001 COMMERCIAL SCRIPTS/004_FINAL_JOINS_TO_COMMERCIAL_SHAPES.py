@@ -92,17 +92,40 @@ arcpy.management.DeleteField(
 
 arcpy.management.AlterField(
     in_table=fc,
+    field="Permitted_Gallons_Per_Month",
+    new_field_name="Permitted_",
+    new_field_alias="Permitted_"
+)
+
+arcpy.management.AlterField(
+    in_table=fc,
     field="Customer_Name",
-    new_field_name="Property_Name",
-    new_field_alias="Property_Name"
+    new_field_name="Property_N",
+    new_field_alias="Property_N"
+)
+
+arcpy.management.AlterField(
+    in_table=fc,
+    field="Account_Prefix",
+    new_field_name="Account_Pr",
+    new_field_alias="Account_Pr"
 )
 
 arcpy.management.AlterField(
     in_table=fc,
     field="Customer_Address",
-    new_field_name="Property_Address",
-    new_field_alias="Property_Address"
+    new_field_name="Property_A",
+    new_field_alias="Property_A"
 )
+
+arcpy.management.AlterField(
+    in_table=fc,
+    field="Irrigation_Usage",
+    new_field_name="Irrigation",
+    new_field_alias="Irrigation"
+)
+
+
 
 arcpy.ClearWorkspaceCache_management()
 time.sleep(5)
