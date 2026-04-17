@@ -44,6 +44,7 @@ from sqlalchemy import DATE
 
 #DECLARE GLOBAL VARIABLES
 
+DATE = time.strftime("%d%b%y", time.localtime()).upper()
 CURRENT_MONTH = (datetime.now() - timedelta(days=30)).strftime("%b").upper()
 YEAR = str(int(datetime.now().strftime("%y")))
 
@@ -142,6 +143,7 @@ def prepare_dataframe(df: pd.DataFrame, cdt: pd.DataFrame):
     sod_merge = sod_merge.sort_values(by=['RES_ID'])
     sod_merge = sod_merge.sort_values(by=['Account'])
     sod_merge_sort = sod_merge.set_index('Account', drop = False)
+    sod_merge.to_csv("after_sod_merge.csv", index=False)
         
     ### GROUP BY RES_ID TO EFFECTIVELY DISSOLVE AND SUM USAGE AND BASE VALUE FIELDS, WHILE CONCATENATING THE TWO STRINGS FOR NAME AND ACCOUNT FIELDS (lIST NEEDED TO RETAIN ORDER) ###                                                                   
     df_clean = sod_merge_sort.groupby('RES_ID', as_index = False, sort = False).agg({'Account': list,
@@ -160,7 +162,7 @@ def prepare_dataframe(df: pd.DataFrame, cdt: pd.DataFrame):
                                                 'RMD_USAGE' : 'first',
                                                 'SOD_SF' : 'first',
                                                 'PROVIDER' : 'first'})
-
+    df_clean.to_csv("after_sod_group.csv", index=False)
     ### REMOVE QUOTES AND BRACKETS FROM NAME AND ACCOUNT ###
     df_clean["Account"] = df_clean["Account"].astype(str).str.replace(r"[\[\]\"']", "", regex=True).replace(r'^\s*$', np.nan, regex=True)
     df_clean["Account"] = df_clean["Account"].astype(str).str.strip("\"")
@@ -171,7 +173,6 @@ def prepare_dataframe(df: pd.DataFrame, cdt: pd.DataFrame):
     ### CREATE OWNERSHIP COLUMN, CALCULATE VILLAGES OR PRIVATE FOR VALUE BASED ON THE NAME COLUMN AND CONDITIONAL STATEMENT ###
     df_clean['OWNERSHIP'] = 'PRIVATE'
     df_clean.loc[(df_clean["Customer_Name"].str.contains("VILLAGES")) & (~df_clean["Customer_Name"].str.contains("/")), 'OWNERSHIP'] = 'THE VILLAGES'
-        
     cdt_merge = pd.merge(df_clean, cdt, how='left', left_on='RES_ID', right_on='RES_ID_CDT', suffixes=('_1', '_2'))
     cdt_merge.to_csv("frame_after_closing_date_join.csv", index=False)
     cdt_merge["CLOSING_DATE"] = cdt_merge["CLOSING_DATE"].astype(str)
@@ -196,67 +197,3 @@ def prepare_dataframe(df: pd.DataFrame, cdt: pd.DataFrame):
 
     print(df_clean)
     return df_clean
-
-def exportFeatures(inPath, outPath, xpression, name):
-    success = False
-    attempt = 0
-    maxAttempts = 3
-    while attempt < maxAttempts and not success:
-        try:
-            attempt += 1
-            arcpy.conversion.ExportFeatures(inPath, outPath, xpression)
-            success = True
-        except Exception as e:
-            if attempt < maxAttempts:
-                print(f"Trying attempt {attempt + 1}....")
-                               
-    if not success:
-        print("All attempts failed")
-
-
-
-def copyFeatures(inPath, outPath, ):
-    success = False
-    attempt = 0
-    maxAttempts = 3
-    while attempt < maxAttempts and not success:
-        try:
-            attempt += 1
-            arcpy.management.CopyFeatures(inPath, outPath)
-            success = True
-        except Exception as e:
-            if attempt < maxAttempts:
-                print(f"Trying attempt {attempt + 1}....")
-                               
-    if not success:
-        print("All attempts failed")
-
-
-def prepare_data():
-    ### EXPORT HOMESITES TO IRRIGATION GDB
-    GDB = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\00 GEODATABASE\IRRIGATION_USAGE.gdb"
-    arcpy.env.workspace = r"A:\GIS\00 DATA\02 GEODATABASES\001 DEVELOPMENT\DEV_RESIDENTIAL.gdb"
-    arcpy.env.overwriteOutput = True
-    arcpy.management.CopyFeatures('RESIDENTIAL_FD\HOMESITE', GDB + "\\" + "HOMESITE")
-    arcpy.management.CopyFeatures('RESIDENTIAL_FD\NEIGHBORHOOD', GDB + "\\" + "NEIGHBORHOOD")
-    arcpy.env.workspace = r"A:\GIS\00 DATA\02 GEODATABASES\001 DEVELOPMENT\DEV_ROADWAY.gdb"
-    arcpy.env.overwriteOutput = True
-    arcpy.management.CopyFeatures('ROADWAY_FD\ROADWAY_EOP', GDB + "\\" + "ROADS_" + DATE)
-
-def prepare_closing_date_table():
-    # APPEND MONTHLY MSI100 to COMPLETE TABLE AND WRITE BACK TO EXCEL WORKSHEET
-
-    closing_date_table = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\00 SUPPORT\TABLES_RECVD\RESIDENTIAL" + "\\" + CURRENT_MONTH + YEAR + "\\" + "MSI100.xlsx"
-    closing_date_complete_table = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\00 SUPPORT\TABLES_RECVD\RESIDENTIAL\CLOSING_DATE_COMPLETE\MSI100.xlsx"
-
-    # Load data
-    temp_cdt = pd.read_excel(closing_date_table)
-    df_complete = pd.read_excel(closing_date_complete_table)
-
-    # Append (concatenate)
-    df_updated = pd.concat([df_complete, temp_cdt], ignore_index=True)
-
-    # Write back to the original file
-    df_updated.to_excel(closing_date_complete_table, index=False)
-
-    

@@ -44,7 +44,7 @@ import pandas as pd
 import numpy as np
 import xlsxwriter
 from openpyxl import load_workbook
-import datetime
+from datetime import datetime, timedelta
 import time
 from time import localtime, strftime
 print("SCRIPT STARTED AT " + strftime("%m/%d/%Y %H:%M:%S", localtime()))
@@ -58,7 +58,7 @@ MONTH_LIST = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OC
 
 ### CHANGE CURRENT MONTH, USE 3 LETTER ABBREVIATION ###
 
-CURRENT_MONTH = "FEB" ####################################### REQUIRES USER INPUT TO CHANGE, USE 3-LETTER MONTH KEY FOR CURRENT MONTH YOU ARE RUNNING
+CURRENT_MONTH = (datetime.now() - timedelta(days=30)).strftime("%b").upper()
 DICT={'JAN':'1',
 'FEB':'2',
 'MAR':'3',
@@ -77,7 +77,7 @@ for m in MONTH_LIST:
     df = pd.DataFrame(columns = cols)
     print(m)
     MONTH = m
-    YEAR = "26"
+    YEAR = str(int(datetime.now().strftime("%y")))
 
 
     GDB = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\GEODATABASE"

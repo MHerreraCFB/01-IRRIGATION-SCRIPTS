@@ -51,10 +51,7 @@ DATE = strftime("%d%b%y", localtime()).upper()
 arcpy.ClearWorkspaceCache_management()
 arcpy.env.overwriteOutput = True
 
-MONTH_LIST = []
-
 CURRENT_MONTH = (datetime.now() - timedelta(days=30)).strftime("%b").upper()
-MONTH_LIST.push(CURRENT_MONTH)
 
 DICT={'JAN':'1',
 'FEB':'2',
@@ -131,12 +128,12 @@ for k in var_dict:
 
     ### IMPORT TABLE WITH RMD_USAGE, MERGE TO COMMERCIAL SHAPES, HANDLE NON-MATCHES ###
         irrigation_ciac = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\00 GEODATABASE\IRRIGATION_USAGE.gdb\IRRIGATION_CIAC"
-        fields = ["ACC_PREFIX", "PROVIDER", "Type", "Permitted_"]
+        fields = ["ACC_PREFIX", "PROVIDER", "Type", "Permitted_Gallons_Per_Month"]
         data = [row for row in arcpy.da.SearchCursor(irrigation_ciac, fields)]
 
         rmd = pd.DataFrame(data, columns=fields)
         rmd.columns = rmd.columns.str.strip().str.replace('\u00A0', ' ')
-        rmd.rename(columns = {"Permitted_":"RMD_USAGE"}, inplace = True)
+        rmd.rename(columns = {"Permitted_Gallons_Per_Month":"RMD_USAGE"}, inplace = True)
         rmd.rename(columns = {"ACC_PREFIX":"Account Prefix"}, inplace = True)
 
         rmd_merge = pd.merge(df, rmd, how='inner', on='Account Prefix', suffixes=('_1', '_2'))

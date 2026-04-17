@@ -133,7 +133,7 @@ time.sleep(5)
 ### REMOVE DUPLICATES BASED ON Account_Prefix ###
 arcpy.management.DeleteIdentical(
     in_dataset=fc,
-    fields=["Account_Prefix"]
+    fields=["ACC_PREFIX"]
 )
 
 #ADD CUR_USAGE nad CUR_PCT FIELDS

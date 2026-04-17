@@ -48,9 +48,11 @@ from collections import deque
 import math
 from time import localtime, strftime
 arcpy.ClearWorkspaceCache_management()
+from datetime import datetime, timedelta
 
 DATE = strftime("%d%b%y", localtime()).upper()
-CURRENT_MONTH = (datetime.now() - datetime.timedelta(days=30)).strftime("%b").upper()
+
+CURRENT_MONTH = (datetime.now() - timedelta(days=30)).strftime("%b").upper()
 YEAR = str(int(datetime.now().strftime("%y")))
 GDB =  r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\GEODATABASE" + "\\" + CURRENT_MONTH + YEAR  + ".gdb"
 
@@ -308,7 +310,7 @@ arcpy.conversion.ExportFeatures('UNITS_SHAPE_FOR_JOIN_' + CURRENT_MONTH + YEAR, 
 
 arcpy.env.workspace = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\00 GEODATABASE\IRRIGATION_USAGE.gdb"
 arcpy.env.overwriteOutput = True
-arcpy.management.CopyFeatures("ROADS_" + DATE, GDB + "\\" + "ROADS_" + DATE)
+arcpy.management.CopyFeatures("ROADWAY_EOP", GDB + "\\" + "ROADS_" + DATE)
 
 arcpy.env.workspace = GDB
 arcpy.env.overwriteOutput = True

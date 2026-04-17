@@ -26,7 +26,6 @@ OUTPUTS:
 NOTES:
     Part one in a series of four, and a one and a half. Must change the month to current month before running.
     Acculumate new closing date to the complete closing date file for the complete file, open last months and append last months to the current month
-    Create a GDB using ArcCatalog in A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_GDB with CURRENTMONTH+CURRENTYEAR.gdb
 
 CHANGELOG:
     2025-07-01 - Moises Herrera: Removed iterative run on all months using all excel sheets from previous month. Instead, I designed it to only run on current month. 
@@ -54,17 +53,11 @@ from openpyxl import load_workbook
 from datetime import datetime, timedelta
 import time
 from time import localtime, strftime
-from IRRIGATION_PREPARE_PACKAGE import prepare_dataframe, prepare_data, prepare_closing_date_table
+from IRRIGATION_PREPARE_PACKAGE import prepare_dataframe
 
 print("SCRIPT STARTED AT " + strftime("%m/%d/%Y %H:%M:%S", localtime()))
 
-#INITIALIZATION STEPS
-prepare_data()
-
-### PREPARE CLOSING DATE TABLE ###
 closing_date_complete_table = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\00 SUPPORT\TABLES_RECVD\RESIDENTIAL\CLOSING_DATE_COMPLETE\MSI100.xlsx"
-prepare_closing_date_table()
-time.sleep(3)
 cdt = pd.read_excel(closing_date_complete_table, 0)
 
 
@@ -153,23 +146,23 @@ for filename in os.listdir(directory):
             else: pass
 
 for k in var_dict:
-    if type(var_dict[k]) != str:
-        rows.append(var_dict[k])  # Collect each row
+        if type(var_dict[k]) != str:
+            rows.append(var_dict[k])  # Collect each row
 
-# Concatenate all at once
-    print("Rows:", rows)
-    df = pd.concat(rows, ignore_index=True)
+    # Concatenate all at once
+        print("Rows:", rows)
+        df = pd.concat(rows, ignore_index=True)
 
-    df.to_csv("frame_after_excel_reading.csv", index=False)
+        df.to_csv("frame_after_excel_reading.csv", index=False)
 
-# Prepare Dataframe using a support python file
-    df_ready = prepare_dataframe(df, cdt)
+    # Prepare Dataframe using a support python file
+        df_ready = prepare_dataframe(df, cdt)
 
-    ### CREATE FOLDER FOR TABLES (IF NOT YET EXISTING), WRITE MERGED DATAFRAME TO EXCEL ###
-    parent_dir = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\RESIDENTIAL_TABLES"
-    output_folder = os.path.join(parent_dir, CURRENT_MONTH + YEAR)
-    if not os.path.exists(output_folder):
-        os.mkdir(output_folder)
-    writer = pd.ExcelWriter(parent_dir + "\\"+ CURRENT_MONTH + YEAR + "\\" + "IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + ".xlsx", engine='xlsxwriter')
-    df_ready.to_excel(writer, CURRENT_MONTH + YEAR,index=False, startrow=0 , startcol=0)
-    writer.close()
+        ### CREATE FOLDER FOR TABLES (IF NOT YET EXISTING), WRITE MERGED DATAFRAME TO EXCEL ###
+        parent_dir = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\RESIDENTIAL_TABLES"
+        output_folder = os.path.join(parent_dir, CURRENT_MONTH + YEAR)
+        if not os.path.exists(output_folder):
+            os.mkdir(output_folder)
+        writer = pd.ExcelWriter(parent_dir + "\\"+ CURRENT_MONTH + YEAR + "\\" + "IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + ".xlsx", engine='xlsxwriter')
+        df_ready.to_excel(writer, CURRENT_MONTH + YEAR,index=False, startrow=0 , startcol=0)
+        writer.close()

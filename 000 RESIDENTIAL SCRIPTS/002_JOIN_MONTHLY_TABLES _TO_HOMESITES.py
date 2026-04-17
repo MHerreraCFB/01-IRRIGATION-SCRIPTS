@@ -35,11 +35,11 @@ CHANGELOG:
 
 ### PART 002: LOOP THROUGH LIST OF TABLES CREATED IN STEP 001, JOIN EACH TABLE TO HOMESITES, COPY JOINED FEATURES TO NEW SHAPE OUTPUT
 import arcpy
-import datetime
+from datetime import datetime, timedelta
 import time
 from time import localtime, strftime
 DATE = strftime("%d%b%y", localtime()).upper()
-CURRENT_MONTH = (datetime.now() - datetime.timedelta(days=30)).strftime("%b").upper()
+CURRENT_MONTH = (datetime.now() - timedelta(days=30)).strftime("%b").upper()
 YEAR = str(int(datetime.now().strftime("%y")))
 
 ### JOIN TO HOMESITES FOR EACH MONTH ###

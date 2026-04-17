@@ -34,15 +34,18 @@ CHANGELOG:
 """
 
 ### IMPORT ALL MONTHLY GIS TABLES AS DATAFRAMES, MERGE TOGETHER INTO 1 DATAFRAME, CALC 4MONTH USAGE/REC FIELDS, EXPORT MERGED TABLE ###
-from datetime import timedelta
-import datetime
+
+
 
 import arcpy
 import pandas as pd
 import calendar
 from collections import deque
 import numpy as np
+from datetime import datetime, timedelta
 
+now = datetime.now()
+print(now)
 CURRENT_MONTH = (datetime.now() - timedelta(days=30)).strftime("%b").upper()
 YEAR = str(int(datetime.now().strftime("%y")))
 
