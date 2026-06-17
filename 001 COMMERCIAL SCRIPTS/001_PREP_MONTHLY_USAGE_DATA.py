@@ -25,7 +25,7 @@ OUTPUTS:
 
 NOTES:
     Part one in a series of four, and a one and a half.
-    Export out the most up to date commercial shapes to A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\00 GEODATABASE\IRRIGATION_USAGE.gdb
+    Add new permitted gallons information to IRRIGATION_CIAC in A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\00 GEODATABASE\IRRIGATION_USAGE.gdb
 
 COMMON BUGS AND SOLUTIONS: File is not a zip file. Change Excel type to correct type.
 
@@ -94,10 +94,12 @@ for filename in os.listdir(directory):
             df_sheets = pd.read_excel(file, sheet_name=None, engine="openpyxl")
             #Using keys() method of data frame
             sheet_list = list(df_sheets.keys())
+            worksheetName1 = str(sheet_month) + "-" + YEAR
+            worksheetName1b = str(sheet_month) + "-" + YEAR2
             worksheetName2 = str(sheet_month) + "-20" + YEAR
             worksheetName2b = str(sheet_month) + "-20" + YEAR2
    
-            valid_names = {worksheetName2, worksheetName2b}
+            valid_names = {worksheetName2, worksheetName2b, worksheetName1, worksheetName1b}
 
             print("Printing sheet list")
             print(sheet_list)

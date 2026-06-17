@@ -24,8 +24,8 @@ OUTPUTS:
     Final homesites, final units, final roads to selecte GDB
 
 NOTES:
-    Fourth part of four part series. Export new neighborhoods/dev_residential and roadway_eop/dev_roadway to your scratch gdb. Change current month!
-    PART 005: MERGE WITH MOST RECENT CONTRACTORS, USE RESULTS FROM IRRIGATION DATA SCRIPTS USE THE UNIT ENTRIES AND MERGE WITH THE FINAL UNITS OUTPUT SHOULD BE ONLY 4 or 5, FILL IN MISSING FIELDS LIKE UNIT, DISTRICT, UNIT JOIN AFTER MERGE.
+    
+    NEXT AUTOMATION IMPLEMENTATION: MERGE WITH MOST RECENT CONTRACTORS, remove two extra fields, NAT to Null, delete 12 and 13.
 
 CHANGELOG:
     2025-08-05 - Moises Herrera: Made all outputs into long integers rounded to a whole number. Output has no more decimals. Removed unneeded prefixes like SUM and MEAN from the final layer. All months are placed in reversed chronological order. 
@@ -56,6 +56,10 @@ CURRENT_MONTH = (datetime.now() - timedelta(days=30)).strftime("%b").upper()
 YEAR = str(int(datetime.now().strftime("%y")))
 GDB =  r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\01 MONTHLY RESULTS\GEODATABASE" + "\\" + CURRENT_MONTH + YEAR  + ".gdb"
 
+CURRENT_MONTH_USAGE = CURRENT_MONTH + "_USAGE"
+CURRENT_MONTH_PCT = CURRENT_MONTH + "_PCT"
+
+
 ### MAKE WORKSPACE GDB, SET HOMESITES AS INPUT FOR FEATURE LAYER JOIN
 arcpy.env.workspace = GDB
 arcpy.env.overwriteOutput = True
@@ -78,6 +82,11 @@ for table in tables:
 arcpy.management.AddField(GDB + "\\" + 'HOMESITES_IRRIGATION_USAGE_' + CURRENT_MONTH + YEAR + "_FINAL", "ROAD_JOIN", "TEXT")
 
 fc = GDB + "\\" + 'HOMESITES_IRRIGATION_USAGE_' + CURRENT_MONTH + YEAR + "_FINAL"
+arcpy.management.AddField(fc, "CUR_USAGE", "LONG")
+arcpy.management.AddField(fc, "CUR_PCT", "LONG")
+arcpy.management.CalculateField(fc, "CUR_USAGE", f"!{CURRENT_MONTH_USAGE}!", "PYTHON3")
+arcpy.management.CalculateField(fc, "CUR_PCT", f"!{CURRENT_MONTH_PCT}!", "PYTHON3")
+
 
 keys = ["AVE", "CIR", "CT", "DR", "LN", "LOOP", "PATH", "PL", "RD", "RUN", "ST", "TER", "TRL", "WAY"]
 vals = ["Avenue", "Circle", "Court", "Drive", "Lane", "Loop", "Path", "Place", "Road", "Run", "Street", "Terrace", "Trail", "Way"]
@@ -441,6 +450,10 @@ arcpy.management.DeleteField(GDB + "\\" + "UNITS_IRRIGATION_USAGE_" + CURRENT_MO
 units_fc = GDB + "\\" + "UNITS_IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + "_FINAL"
 
 arcpy.management.AddField(units_fc, "UNIT_JOIN", "TEXT")
+arcpy.management.AddField(units_fc, "CUR_USAGE", "LONG")
+arcpy.management.AddField(units_fc, "CUR_PCT", "LONG")
+arcpy.management.CalculateField(units_fc, "CUR_USAGE", f"!{CURRENT_MONTH_USAGE}!", "PYTHON3")
+arcpy.management.CalculateField(units_fc, "CUR_PCT", f"!{CURRENT_MONTH_PCT}!", "PYTHON3")
 
 fields = ['RES_TYPE5', 'UNIT_JOIN']
 with arcpy.da.UpdateCursor(units_fc, fields) as cursor:
@@ -452,6 +465,10 @@ roads_fc = GDB + "\\" + "ROADS_IRRIGATION_USAGE_" + CURRENT_MONTH + YEAR + "_FIN
 
 # Add UNIT_JOIN field to roads (if not already present)
 arcpy.management.AddField(roads_fc, "UNIT_JOIN", "TEXT")
+arcpy.management.AddField(roads_fc, "CUR_USAGE", "LONG")
+arcpy.management.AddField(roads_fc, "CUR_PCT", "LONG")
+arcpy.management.CalculateField(roads_fc, "CUR_USAGE", f"!{CURRENT_MONTH_USAGE}!", "PYTHON3")
+arcpy.management.CalculateField(roads_fc, "CUR_PCT", f"!{CURRENT_MONTH_PCT}!", "PYTHON3")
 
 # Make a temporary in-memory layer for spatial join
 roads_temp = "in_memory\\roads_with_unit"
@@ -480,18 +497,9 @@ with arcpy.da.UpdateCursor(roads_fc, ['OBJECTID', 'UNIT_JOIN']) as cursor:
             row[1] = road_unit_dict[row[0]]
             cursor.updateRow(row)
 
-# Add CUR_USAGE field to roads, homesites, and units 
-arcpy.management.AddField(roads_fc, "CUR_USAGE", "LONG")
-
 ### EXPORT FINAL FEATURES TO DELIVERABLE GDB ##
-CURRENT_MONTH_USAGE = CURRENT_MONTH + "_USAGE"
-CURRENT_MONTH_PCT = CURRENT_MONTH + "_PCT"
 arcpy.env.workspace = GDB
 for fc in arcpy.ListFeatureClasses("*FINAL",'',''):
-    arcpy.management.AddField(fc, "CUR_USAGE", "LONG")
-    arcpy.management.AddField(fc, "CUR_PCT", "LONG")
-    arcpy.management.CalculateField(fc, "CUR_USAGE", f"!{CURRENT_MONTH_USAGE}!", "PYTHON3")
-    arcpy.management.CalculateField(fc, "CUR_PCT", f"!{CURRENT_MONTH_PCT}!", "PYTHON3")
 
     arcpy.CopyFeatures_management(in_features=fc, out_feature_class= r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\02 DELIVERABLES\00 GEODATABASE\IRRIGATION_USAGE.gdb" + "\\" + fc)
 

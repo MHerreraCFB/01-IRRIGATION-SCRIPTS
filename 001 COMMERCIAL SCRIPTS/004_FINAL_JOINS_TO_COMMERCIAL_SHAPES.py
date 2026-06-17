@@ -24,7 +24,7 @@ OUTPUTS:
     Final commercial shapes to GDB
 
 NOTES:
-    Fourth part of four part series. Export new commercial shapes if any. Change month to current month.
+    Fourth part of four part series.
 
 CHANGELOG:
     0000-00-00 - FIRSTNAME LASTNAME:
@@ -37,13 +37,8 @@ CHANGELOG:
 ### JOIN FINAL TABLE TO COMMERCIAL SHAPES ###
 import os
 import arcpy
-import pandas as pd
 import datetime
-import re
 import time
-import calendar
-from collections import deque
-import math
 from time import localtime, strftime
 
 from datetime import datetime, timedelta

@@ -8,7 +8,7 @@ LAST UPDATED:   2026-04-08 (YYYY-MM-DD)
 VERSION:        1.2.0 (e.g., 1.0.0)
 
 DESCRIPTION:
-    Support function to be used in 001_PREP_MONTHLY_USAGE_DATA.py
+    Support function, run this before 001_PREP_MONTHLY_USAGE_DATA.py
 
 USAGE:
     Hit run or run in debug mode
@@ -24,7 +24,13 @@ OUTPUTS:
     Varies on function used
 
 NOTES:
-    Contains various support functions used to prepare irrigation usage final tables before uploading to ArcGIS Enterprise Dashboard
+
+
+    Contains various support functions used to prepare irrigation usage final tables before uploading to ArcGIS Enterprise Dashboard.
+    *To begin Irrigation Data preparation process just ensure that new data exists in bin, a new folder for the current running month 
+    is in 00SUPPORT/TABLES_RECVD/RESIDENTIAL, and the MSI100 and MSI102 are in the new folder for the curreny running month.*
+
+    Next Automation Implementation: automate MOD creation and transfer from bin, checking and converting too correct excel type: workbook
 
 CHANGELOG:
     2026-04-08 - Moises Herrera: Making some updates, documentation, adding Copy Features.
@@ -34,19 +40,33 @@ CHANGELOG:
 """
 # Export out the most up to date homesite data from Dev_Residential to A:\GIS\00 DATA\02 GEODATABASES\800 SCRATCH_DATA\MH_SCRATCH_DATA\HERRERA_SCRATCH_DATA.gdb\HOMESITE
 
-from datetime import datetime, timedelta
-import time
+
+import shutil
 
 import pandas as pd
 import numpy as np
 import arcpy
 from sqlalchemy import DATE
+from datetime import datetime, timedelta
+import time
+import os
+import win32com.client as win32
+
 
 #DECLARE GLOBAL VARIABLES
-
-DATE = time.strftime("%d%b%y", time.localtime()).upper()
 CURRENT_MONTH = (datetime.now() - timedelta(days=30)).strftime("%b").upper()
+DATE = time.strftime("%d%b%y", time.localtime()).upper()
 YEAR = str(int(datetime.now().strftime("%y")))
+reference_date = datetime.now() - timedelta(days=30)
+
+month_num = reference_date.month
+
+target_sheets = [
+    f"{month_num}-{reference_date.strftime('%Y')}",
+    f"{month_num}-{reference_date.strftime('%y')}"
+]
+
+print(target_sheets)
 
 def exportFeatures(inPath, outPath, xpression, name):
     success = False
@@ -119,3 +139,109 @@ prepare_data()
 
 ### PREPARE CLOSING DATE TABLE ###
 prepare_closing_date_table()
+
+### CONVERT ALL IN BIN TO MICROSOFT EXCEL WORKSHEETS
+directory = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\00 SUPPORT\TABLES_RECVD\BIN\Residential"
+excel = win32.gencache.EnsureDispatch('Excel.Application')
+excel.Visible = False
+
+try:
+    for filename in os.listdir(directory):
+        if filename.endswith(".xls") and not filename.endswith(".xlsx"):
+            xls_path = os.path.join(directory, filename)
+            xlsx_filename = os.path.splitext(filename)[0] + ".xlsx"
+            xlsx_path = os.path.join(directory, xlsx_filename)
+            workbook = excel.Workbooks.Open(xls_path)
+
+            workbook.SaveAs(xlsx_path, FileFormat=51)
+
+            workbook.Close(False)
+            print(f"Converted: {filename} - > {xlsx_filename}")
+
+finally:
+    excel.Quit()
+
+# -----------------------------------
+# STEP 2: Modify all .xlsx files
+# -----------------------------------
+
+for filename in os.listdir(directory):
+
+    if filename.lower().endswith(".xlsx"):
+
+        xlsx_path = os.path.join(directory, filename)
+
+        # Get workbook sheet names
+        workbook = pd.ExcelFile(xlsx_path)
+
+        matching_sheet = None
+
+        for sheet in workbook.sheet_names:
+            if sheet in target_sheets:
+                matching_sheet = sheet
+                break
+
+        if not matching_sheet:
+            print(f"Skipped: {filename}")
+            continue
+
+        # Read only target sheet
+        df = pd.read_excel(
+            xlsx_path,
+            sheet_name=matching_sheet
+        )
+
+        fields_to_remove = [
+            "Meter",
+            "Irrigation Usage Fee",
+            "County"
+        ]
+
+        df.drop(
+            columns=fields_to_remove,
+            inplace=True,
+            errors="ignore"
+        )
+
+        df.rename(
+            columns={
+                "Irrigation Usage": "Usage"
+            },
+            inplace=True
+        )
+
+        # Replace only that sheet
+        with pd.ExcelWriter(
+            xlsx_path,
+            engine="openpyxl",
+            mode="a",
+            if_sheet_exists="replace"
+        ) as writer:
+
+            df.to_excel(
+                writer,
+                sheet_name=matching_sheet,
+                index=False
+            )
+
+        print(f"Updated: {filename} [{matching_sheet}]")
+
+
+final_directory = r"A:\GIS\01 PROJECTS\906 IRRIGATION USAGE MAP\00 SUPPORT\TABLES_RECVD\RESIDENTIAL" + "\\" + CURRENT_MONTH + YEAR + "\\" + "MOD"
+
+# Create destination if it doesn't exist
+os.makedirs(final_directory, exist_ok=True)
+
+for filename in os.listdir(directory):
+    
+    source_path = os.path.join(directory, filename)
+
+    # Skip directories
+    if not os.path.isfile(source_path):
+        continue
+
+    destination_path = os.path.join(final_directory, filename)
+
+    shutil.move(source_path, destination_path)
+
+    print(f"Moved: {filename}")

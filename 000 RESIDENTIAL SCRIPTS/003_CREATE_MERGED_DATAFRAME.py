@@ -24,7 +24,7 @@ OUTPUTS:
     Geodatabase with new tables
 
 NOTES:
-    Part three in a four part series. Must change current month. 
+    Part three in a four part series.
 
 CHANGELOG:
     2025-08-05 - Moises Herrera: Months are listed in table in reverse chronological order beginnning from current month
@@ -40,8 +40,6 @@ CHANGELOG:
 import arcpy
 import pandas as pd
 import calendar
-from collections import deque
-import numpy as np
 from datetime import datetime, timedelta
 
 now = datetime.now()

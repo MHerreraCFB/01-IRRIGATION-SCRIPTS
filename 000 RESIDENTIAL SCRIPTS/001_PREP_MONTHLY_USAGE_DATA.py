@@ -24,8 +24,9 @@ OUTPUTS:
     Creates a new table of aggregated and prepared data fields for the current month
 
 NOTES:
-    Part one in a series of four, and a one and a half. Must change the month to current month before running.
-    Acculumate new closing date to the complete closing date file for the complete file, open last months and append last months to the current month
+
+    NEXT AUTOMATION IMPLMENTATION: add 4-26 format as an option,
+    Create GDB
 
 CHANGELOG:
     2025-07-01 - Moises Herrera: Removed iterative run on all months using all excel sheets from previous month. Instead, I designed it to only run on current month. 
@@ -43,12 +44,8 @@ CHANGELOG:
 ### PART 001: IMPORT USAGE TABLES AND EXPORT PREPARED TABLE TO EXCEL
 ### BEFORE RUNNING SCRIPTS EXPORT OUT NEW HOMESITE FROM DEV_RESIDENTIAL
 import arcpy
-import re
 import os
-import arcpy.management
 import pandas as pd
-import numpy as np
-import xlsxwriter
 from openpyxl import load_workbook
 from datetime import datetime, timedelta
 import time
@@ -105,18 +102,20 @@ for filename in os.listdir(directory):
         time.sleep(1)
         #Using keys() method of data frame
         sheet_list = list(df_sheets.keys())
+        worksheetName1 = str(sheet_month) + "-" + YEAR
+        worksheetName1b = str(sheet_month) + "-" + YEAR2
         worksheetName2 = str(sheet_month) + "-20" + YEAR
         worksheetName2b = str(sheet_month) + "-20" + YEAR2
         print(sheet_list)
 
-        valid_names = {worksheetName2, worksheetName2b}
+        valid_names = {worksheetName2, worksheetName2b, worksheetName1, worksheetName1b}
         for sheet in sheet_list:
             print(sheet)
             if sheet not in valid_names:
                 print(f"Skipping sheet (not target month): {sheet}")
                 continue
-            elif (worksheetName2 in sheet):
-                print(filename, worksheetName2)
+            elif sheet in (worksheetName2, worksheetName1):
+                print(filename, sheet)
                 if ('SEWWCA' in filename):
                     var_dict[count] = pd.read_excel(file, sheet_name= sheet)
                     var_dict[count]["PROVIDER"] = 'SEWWCA'
@@ -129,8 +128,8 @@ for filename in os.listdir(directory):
                 elif ('FWCA' in filename):
                     var_dict[count] = pd.read_excel(file, sheet_name= sheet)
                     var_dict[count]["PROVIDER"] = 'FWCA'
-            elif (worksheetName2b in sheet):
-                    print(filename, worksheetName2b)
+            elif sheet in (worksheetName2b, worksheetName1b):
+                    print(filename, sheet)
                     if ('SEWWCA' in filename):
                         var_dict[count] = pd.read_excel(file, sheet_name= sheet)
                         var_dict[count]["PROVIDER"] = 'SEWWCA'

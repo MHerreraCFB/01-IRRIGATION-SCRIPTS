@@ -18,14 +18,14 @@ REQUIREMENTS:
     - Dependencies: arcpy, os, arcpy.management, pandas, numpy, xlsxwriter, re, datetime, time
 
 INPUTS:
-    Excel sheets of aggregated and prepared irrigation data found r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_TABLES" + "\\"+ CURRENT_MONTH + YEAR + "\\" + "IRRIGATION_USAGE_" + MONTH + YEAR + ".xlsx"
+    Excel sheets of aggregated and prepared irrigation data in past deliverables folder for previous month
 
 OUTPUTS:
     Tables in a geodatabase
 
 NOTES:
-    Step one point five in a four part series, must change month to current month before running, must import excel sheets from previous months into filepath before running,
-    must create a gdb at filepath for current month before running. This script was created as an addition to the four part series to reduce the amount of time to run the script. Now a required
+    Step one point five in a four part series,  must import excel sheets from previous months into filepath before running,
+    This script was created as an addition to the four part series to reduce the amount of time to run the script. Now a required
     step in the series. 
 
 CHANGELOG:

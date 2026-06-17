@@ -18,14 +18,15 @@ REQUIREMENTS:
     - Dependencies: arcpy, os, arcpy.management, pandas, numpy, xlsxwriter, re, datetime, time
 
 INPUTS:
-    Excel sheets of aggregated and prepared irrigation data found r"A:\TEST_LOCATION\03 PROGRAMMING\0008_IRRIGATION_USAGE\OUTPUT_TABLES" + "\\"+ CURRENT_MONTH + YEAR + "\\" + "IRRIGATION_USAGE_" + MONTH + YEAR + ".xlsx"
+    Excel sheets of aggregated and prepared irrigation data found in project deliverables folder for current month
 
 OUTPUTS:
     Tables in a geodatabase
 
 NOTES:
-    Step one point five in a four part series, must change month to current month before running, must import excel sheets from previous months into filepath before running,
-    must create a gdb at filepath for current month before running. This script was created as an addition to the four part series to reduce the amount of time to run the script. Now a required
+    NEXT AUTOMATION IMPLEMENTATION: must import excel sheets from previous months into filepath before running,must create a gdb at filepath for current month before running. 
+    
+    This script was created as an addition to the four part series to reduce the amount of time to run the script. Now a required
     step in the series. 
 
 CHANGELOG:
@@ -37,15 +38,11 @@ CHANGELOG:
 
  ### PART 001: IMPORT USAGE TABLES, CREATE RES_IDS, JOIN TO SOD SF AND HOMESITE SOLD TABLES, EXPORT MONTHLY TABLES TO GDB
 import arcpy
-import re
 import os
 import arcpy.management
 import pandas as pd
-import numpy as np
-import xlsxwriter
 from openpyxl import load_workbook
 from datetime import datetime, timedelta
-import time
 from time import localtime, strftime
 print("SCRIPT STARTED AT " + strftime("%m/%d/%Y %H:%M:%S", localtime()))
 

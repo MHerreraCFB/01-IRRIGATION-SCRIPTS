@@ -25,7 +25,7 @@ OUTPUTS:
     ESRI GDB Geometry polygon feature classes - one for each month
 
 NOTES:
-    Part two of a four part series. Must change current month. 
+    Part two of a four part series.
 
 CHANGELOG:
     YYYY-MM-DD - <Author>: <Description of change>
